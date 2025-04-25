@@ -1,6 +1,5 @@
 # Loading necessary libraries
 
-
 import numpy as np
 import pandas as pd
 import nltk
@@ -86,6 +85,13 @@ def coverage(new_series, original_series):
     coverage = (new_sum / original_sum) * 100
     return print("Coverage: ", coverage, "%")
 
+def get_origianl_swl(file_path):
+    original_df = load_text_file(file_path)
+    original_df = tokenize_text(original_df)
+    original_df = generate_frequncy_df(original_df)
+
+    return original_df
+
 def get_lemmatized_swl(file_path):
     # Load the text file
     text = load_text_file(file_path)
@@ -144,13 +150,32 @@ def compare_nawl_lemmatized(lemmatized_df):
     coverage = float((common_df['count_df'].sum() / lemmatized_df['count'].sum())* 100)
     print(f"Coverage of NAWL in lemmatized SWL: {coverage:.2f}%")
     return coverage
+def get_top_words(df, top_n=10):
+    return df.head(top_n)
 
-def main():
-    file_path = input("Enter the path to the text file: ")
+def main(file_path):
+    # Get original DataFrame
+    original_df = get_origianl_swl(file_path)
+
+    # Get lemmatized DataFrame
     lemmatized_df = get_lemmatized_swl(file_path)
-    swl = get_95_swl(lemmatized_df)
-    coverage(swl, lemmatized_df)
-    compare_ngsl_lemmatized(lemmatized_df)
 
-if __name__ == "__main__":
-    main()
+    # Get 95% SWL variations
+    swl = get_95_swl(lemmatized_df)
+    swl_no_stopwords = get_95_swl(lemmatized_df, remove_sw=True)
+    swl_no_proper_nouns = get_95_swl(lemmatized_df, remove_pn=True)
+
+    # Get top 10 words for each variation
+    top_original = get_top_words(original_df)
+    top_lemmatized = get_top_words(lemmatized_df)
+    top_swl = get_top_words(swl)
+    top_swl_no_stopwords = get_top_words(swl_no_stopwords)
+    top_swl_no_proper_nouns = get_top_words(swl_no_proper_nouns)
+
+    return {
+        "top_original": top_original,
+        "top_lemmatized": top_lemmatized,
+        "top_swl": top_swl,
+        "top_swl_no_stopwords": top_swl_no_stopwords,
+        "top_swl_no_proper_nouns": top_swl_no_proper_nouns
+    }
