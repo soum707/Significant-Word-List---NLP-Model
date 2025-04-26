@@ -69,13 +69,13 @@ def display_results(results):
 st.title("From Data to Dialogue: Unlocking Language for All")
 
 st.markdown("""
-    This web app transforms any text into a targeted word list optimized for language learning. Research shows that knowing the 95% most frequent words in a text dramatically improves comprehension, and our tool automates that process for you. Whether you’re a teacher, student, or lifelong learner, you can: <br>
-        - Upload your own file, paste text directly, or choose from our curated classics <br>
-        - Generate multiple word-list variants: original word frequencies, 95% SWL, and 95% SWL without stopwords <br>
-        Download each list as a CSV for easy integration with teaching materials, flash-card apps, or further analysis <br>
-    <br>
+    This web app transforms any text into a targeted word list optimized for language learning. Research shows that knowing the 95% most frequent words in a text dramatically improves comprehension, and our tool automates that process for you. Whether you’re a teacher, student, or lifelong learner, you can:<br>
+    - Upload your own file, paste text directly, or choose from our curated classics<br>
+    - Generate multiple word-list variants: original word frequencies, 95% SWL, and 95% SWL without stopwords<br>
+    - Download each list as a CSV for easy integration with teaching materials, flash-card apps, or further analysis<br><br>
     Harness the power of literature—or any text you like—to build a custom vocabulary list in seconds.
-""")
+""", unsafe_allow_html=True)
+
 
 # Add two tiles for user choice
 st.subheader("Choose Input Method")
