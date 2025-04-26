@@ -5,6 +5,7 @@ import pandas as pd
 import nltk
 import spacy
 import stanza
+from spacy.cli import download as spacy_download
 from nltk import word_tokenize
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
@@ -18,7 +19,11 @@ nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
 stanza.download('en')
-nlp1 = spacy.load("en_core_web_sm")
+try:
+    nlp1 = spacy.load("en_core_web_sm")
+except OSError:
+    spacy_download("en_core_web_sm")
+    nlp1 = spacy.load("en_core_web_sm")
 nlp2 = stanza.Pipeline(lang='en', processors='tokenize,pos')
 
 # Functions

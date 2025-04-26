@@ -5,7 +5,7 @@ import os
 import io
 
 def display_results(results):
-    st.header("Top 10 Words")
+    st.header("Top 10 Words in each Variation")
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Original Words")
@@ -54,8 +54,13 @@ def display_results(results):
 # Streamlit app title
 st.title("From Data to Dialogue: Unlocking Language for All")
 
+st.markdown("""
+    This app allows you to use any text to generate a specialized word list.
+    You can also download the word lists as CSV files for further analysis or use in other applications.
+""")
+
 # Add two tiles for user choice
-st.header("Choose Input Method")
+st.subheader("Choose Input Method")
 option = st.radio("Select one:", ("Upload a File", "Paste Your Text", "Our Choices for You"))
 
 if option == "Upload a File":
@@ -78,7 +83,7 @@ if option == "Upload a File":
 
 elif option == "Paste Your Text":
     # Add a text area for user input
-    st.subheader("Or Paste Your Text Below")
+    st.subheader("Paste Your Text Below")
     user_text = st.text_area("Paste your text here:")
 
     if user_text:
@@ -96,7 +101,7 @@ elif option == "Paste Your Text":
         os.remove(file_path)
 
 elif option == "Our Choices for You":
-    st.subheader("Or Select a Preloaded Text File")
+    st.subheader("Select a Preloaded Text File")
     preloaded_files = ["Alice In Wonderland", "Lord of the Rings - Chapter One", "Titanic"] 
     selected_file = st.selectbox("Select a file:", preloaded_files)
     if selected_file:
