@@ -7,7 +7,9 @@ from main import main
 #     """
 #     <style>
 #     .stApp {
-#         background-color: #FFFFFF;
+#         background-color: #f8f7e8;
+#         color: #000000;
+#         textcolor: #000000;
 #     }
 #     </style>
 #     """,
@@ -39,6 +41,9 @@ if option == "Upload a File":
 
         col1, col2 = st.columns(2)
         with col1:
+            st.subheader("Original Words")
+            st.dataframe(results["top_original"])
+            
             st.subheader("Lemmatized Words")
             st.dataframe(results["top_lemmatized"])
 

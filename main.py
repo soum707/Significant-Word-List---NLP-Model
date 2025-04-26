@@ -79,6 +79,7 @@ def remove_proper_nouns(df):
         if any(word.upos == 'PROPN' for sent in doc.sentences for word in sent.words):
             drops.append(i)
     return df.drop(drops).reset_index(drop=True)
+
 def coverage(new_series, original_series):
     new_sum = new_series.sum()
     original_sum = original_series.sum()
@@ -86,9 +87,9 @@ def coverage(new_series, original_series):
     return print("Coverage: ", coverage, "%")
 
 def get_origianl_swl(file_path):
-    original_df = load_text_file(file_path)
-    original_df = tokenize_text(original_df)
-    original_df = generate_frequncy_df(original_df)
+    loaded_text = load_text_file(file_path)
+    tokenized_list = tokenize_text(loaded_text)
+    original_df = generate_frequncy_df(tokenized_list)
 
     return original_df
 
@@ -122,18 +123,18 @@ def get_95_swl(lemmatized_df,
         swl = remove_proper_nouns(swl)
     
     return swl
-def compare_ngsl_lemmatized(lemmatized_df):
+def compare_ngsl_lemmatized(swl):
     ngsl = pd.read_csv(r"data/ngsl-v1.2.csv")
     ngsl.rename(columns={'Adjusted Frequency per Million (U)': 'count', 'Lemma': 'word'}, inplace=True)
 
     common_df = pd.merge(
-    ngsl, lemmatized_df,
+    ngsl, swl,
     on='word',
     how='inner',
     suffixes=('_ngsl', '_df')
     )
 
-    coverage = float((common_df['count_df'].sum() / lemmatized_df['count'].sum())* 100)
+    coverage = float((common_df['count_df'].sum() / swl['count'].sum())* 100)
     print(f"Coverage of NGSL in lemmatized SWL: {coverage:.2f}%")
     return coverage
 def compare_nawl_lemmatized(lemmatized_df):
