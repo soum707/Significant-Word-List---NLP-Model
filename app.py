@@ -1,27 +1,34 @@
 import streamlit as st
 import pandas as pd
 from main import main
+import os
 
-# Set Streamlit app background to white
-# st.markdown(
-#     """
-#     <style>
-#     .stApp {
-#         background-color: #f8f7e8;
-#         color: #000000;
-#         textcolor: #000000;
-#     }
-#     </style>
-#     """,
-#     unsafe_allow_html=True
-# )
+def display_results(results):
+    st.header("Top 10 Words")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Original Words")
+        st.dataframe(results["top_original"])
+        
+        st.subheader("Lemmatized Words")
+        st.dataframe(results["top_lemmatized"])
+        
+        st.subheader("95% SWL")
+        st.dataframe(results["top_swl"])
+
+    with col2:
+        st.subheader("95% SWL (No Stopwords)")
+        st.dataframe(results["top_swl_no_stopwords"])
+
+        st.subheader("95% SWL (No Proper Nouns)")
+        st.dataframe(results["top_swl_no_proper_nouns"])
 
 # Streamlit app title
 st.title("From Data to Dialogue: Unlocking Language for All")
 
 # Add two tiles for user choice
 st.header("Choose Input Method")
-option = st.radio("Select one:", ("Upload a File", "Paste Your Text"))
+option = st.radio("Select one:", ("Upload a File", "Paste Your Text", "Our Choices for You"))
 
 if option == "Upload a File":
     # File uploader
@@ -36,29 +43,9 @@ if option == "Upload a File":
         # Process the file using main.py
         results = main(file_path)
 
-        # Display the results
-        st.header("Top 10 Words")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.subheader("Original Words")
-            st.dataframe(results["top_original"])
-            
-            st.subheader("Lemmatized Words")
-            st.dataframe(results["top_lemmatized"])
-
-            st.subheader("95% SWL")
-            st.dataframe(results["top_swl"])
-
-        with col2:
-            st.subheader("95% SWL (No Stopwords)")
-            st.dataframe(results["top_swl_no_stopwords"])
-
-            st.subheader("95% SWL (No Proper Nouns)")
-            st.dataframe(results["top_swl_no_proper_nouns"])
+        display_results(results)
 
         # Clean up the temporary file
-        import os
         os.remove(file_path)
 
 elif option == "Paste Your Text":
@@ -75,27 +62,17 @@ elif option == "Paste Your Text":
         # Process the file using main.py
         results = main(file_path)
 
-        # Display the results
-        st.header("Top 10 Words")
-
-        col1, col2 = st.columns(2)
-        with col1:
-            st.subheader("Original Words")
-            st.dataframe(results["top_original"])
-
-            st.subheader("Lemmatized Words")
-            st.dataframe(results["top_lemmatized"])
-
-            st.subheader("95% SWL")
-            st.dataframe(results["top_swl"])
-
-        with col2:
-            st.subheader("95% SWL (No Stopwords)")
-            st.dataframe(results["top_swl_no_stopwords"])
-
-            st.subheader("95% SWL (No Proper Nouns)")
-            st.dataframe(results["top_swl_no_proper_nouns"])
+        display_results(results)
 
         # Clean up the temporary file
-        import os
         os.remove(file_path)
+
+elif option == "Choose Preloaded File":
+    st.subheader("Or Select a Preloaded Text File")
+    preloaded_files = ["data/Alice In Wonderland.txt", "data/Lord of the Rings - Chapter One.txt", "data/Titanic.txt"] 
+    selected_file = st.selectbox("Select a file (with path):", preloaded_files)
+    if selected_file:
+        file_path = selected_file
+        results = main(file_path)
+        
+        display_results(results)
