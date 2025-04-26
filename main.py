@@ -152,6 +152,8 @@ def compare_nawl_lemmatized(lemmatized_df):
     print(f"Coverage of NAWL in lemmatized SWL: {coverage:.2f}%")
     return coverage
 def get_top_words(df, top_n=10):
+    if 'cumulative_coverage' in df.columns:
+        df = df.drop(columns=['cumulative_coverage'])
     return df.head(top_n)
 
 def main(file_path):
@@ -159,24 +161,39 @@ def main(file_path):
     original_df = get_origianl_swl(file_path)
 
     # Get lemmatized DataFrame
-    lemmatized_df = get_lemmatized_swl(file_path)
+    # lemmatized_df = get_lemmatized_swl(file_path)
 
     # Get 95% SWL variations
-    swl = get_95_swl(lemmatized_df)
-    swl_no_stopwords = get_95_swl(lemmatized_df, remove_sw=True)
-    swl_no_proper_nouns = get_95_swl(lemmatized_df, remove_pn=True)
+    swl = get_95_swl(original_df) # change to lemmatized_df if you want to use lemmatized
+    swl_no_stopwords = get_95_swl(original_df, remove_sw=True) # change to lemmatized_df
+    # swl_no_proper_nouns = get_95_swl(lemmatized_df, remove_pn=True)
 
     # Get top 10 words for each variation
     top_original = get_top_words(original_df)
-    top_lemmatized = get_top_words(lemmatized_df)
+    top_lemmatized = get_top_words(original_df) # change to lemmatized_df 
     top_swl = get_top_words(swl)
     top_swl_no_stopwords = get_top_words(swl_no_stopwords)
-    top_swl_no_proper_nouns = get_top_words(swl_no_proper_nouns)
+    # top_swl_no_proper_nouns = get_top_words(swl_no_proper_nouns)
 
     return {
+            # The top 10 words
         "top_original": top_original,
         "top_lemmatized": top_lemmatized,
         "top_swl": top_swl,
         "top_swl_no_stopwords": top_swl_no_stopwords,
-        "top_swl_no_proper_nouns": top_swl_no_proper_nouns
+        # "top_swl_no_proper_nouns": top_swl_no_proper_nouns,
+
+            # The size of each word list
+        "size_original": len(original_df),
+        # "size_lemmatized": len(lemmatized_df),
+        "size_swl": len(swl),
+        "size_swl_no_stopwords": len(swl_no_stopwords),
+        # "size_swl_no_proper_nouns": len(swl_no_proper_nouns)
+
+            # The actual word lists
+        "original_words": original_df,
+        # "lemmatized_words": lemmatized_df,
+        "swl": swl,
+        "swl_no_stopwords": swl_no_stopwords,
+        # "swl_no_proper_nouns": swl_no_proper_nouns
     }

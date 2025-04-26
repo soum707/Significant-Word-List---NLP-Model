@@ -2,26 +2,54 @@ import streamlit as st
 import pandas as pd
 from main import main
 import os
+import io
 
 def display_results(results):
     st.header("Top 10 Words")
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Original Words")
+        st.text("Size: " + str(results["size_original"]))
         st.dataframe(results["top_original"])
+        csv_original = results["original_words"].to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="Download Original Words as CSV",
+            data=csv_original,
+            file_name="original_words.csv",
+            mime="text/csv"
+        )
         
-        st.subheader("Lemmatized Words")
-        st.dataframe(results["top_lemmatized"])
+        # st.subheader("Lemmatized Words")
+        # st.text("Size: " + str(results["size_lemmatized"]))
+        # st.dataframe(results["top_lemmatized"])
+
+        st.subheader("95% SWL (No Stopwords)")
+        st.text("Size: " + str(results["size_swl_no_stopwords"]))
+        st.dataframe(results["top_swl_no_stopwords"])
+        csv_swl_no_stop = results["swl"].to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="Download 95% SWL (No Stopwords) as CSV",
+            data=csv_swl_no_stop,
+            file_name="word_list.csv",
+            mime="text/csv"
+        )
         
-        st.subheader("95% SWL")
-        st.dataframe(results["top_swl"])
 
     with col2:
-        st.subheader("95% SWL (No Stopwords)")
-        st.dataframe(results["top_swl_no_stopwords"])
+        st.subheader("95% SWL")
+        st.text("Size: " + str(results["size_swl"]))
+        st.dataframe(results["top_swl"])
+        csv_swl = results["swl_no_stopwords"].to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="Download 95% SWL as CSV",
+            data=csv_swl,
+            file_name="word_list_nostopwords.csv",
+            mime="text/csv"
+        )
 
-        st.subheader("95% SWL (No Proper Nouns)")
-        st.dataframe(results["top_swl_no_proper_nouns"])
+        # st.subheader("95% SWL (No Proper Nouns)")
+        # st.text("Size: " + str(results["size_swl_no_proper_nouns"]))
+        # st.dataframe(results["top_swl_no_proper_nouns"])
 
 # Streamlit app title
 st.title("From Data to Dialogue: Unlocking Language for All")
@@ -67,12 +95,12 @@ elif option == "Paste Your Text":
         # Clean up the temporary file
         os.remove(file_path)
 
-elif option == "Choose Preloaded File":
+elif option == "Our Choices for You":
     st.subheader("Or Select a Preloaded Text File")
-    preloaded_files = ["data/Alice In Wonderland.txt", "data/Lord of the Rings - Chapter One.txt", "data/Titanic.txt"] 
-    selected_file = st.selectbox("Select a file (with path):", preloaded_files)
+    preloaded_files = ["Alice In Wonderland", "Lord of the Rings - Chapter One", "Titanic"] 
+    selected_file = st.selectbox("Select a file:", preloaded_files)
     if selected_file:
-        file_path = selected_file
+        file_path = "data/" + selected_file + ".txt"
         results = main(file_path)
         
         display_results(results)
