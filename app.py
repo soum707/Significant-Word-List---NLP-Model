@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from main import main
+from functions import main
 import os
 import io
 
