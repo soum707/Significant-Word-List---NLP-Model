@@ -3,6 +3,7 @@ import pandas as pd
 from functions import main
 import os
 import io
+import random
 
 def display_results(results):
     st.header("Top 10 Words in each Variation")
@@ -79,7 +80,12 @@ st.markdown("""
 
 # Add two tiles for user choice
 st.subheader("Choose Input Method")
-option = st.radio("Select one:", ("Upload a File", "Paste Your Text", "Our Choices for You"))
+option = st.radio("Select one:", (
+    "Upload a File",
+    "Paste Your Text",
+    "Our Choices for You",
+    "Play Guess the Literature"
+))
 
 if option == "Upload a File":
     # File uploader
@@ -127,3 +133,46 @@ elif option == "Our Choices for You":
         results = main(file_path)
         
         display_results(results)
+
+elif option == "Play Guess the Literature":
+    st.subheader("Guess the Literature")
+    # Define sample paragraphs
+    samples = {
+        "Pride and Prejudice": (
+            "Elizabeth, as they drove along, watched for the first appearance of Pemberley Woods with some perturbation; "
+            "and when at length they turned in at the lodge, her spirits were in a high flutter. The park was very large, "
+            "and contained great variety of ground. They entered it in one of its lowest points, and drove for some time "
+            "through a beautiful wood stretching over a wide extent. Elizabeth’s mind was too full for conversation, "
+            "but she saw and admired every remarkable spot and point of view."
+        ),
+        "The Great Gatsby": (
+            "In his blue gardens men and girls came and went like moths among the whisperings and the champagne and the stars. "
+            "At high tide in the afternoon I watched his guests diving from the tower of his raft, or taking the sun on the hot sand "
+            "of his beach while his two motor-boats slit the waters of the Sound, drawing aquaplanes over cataracts of foam."
+        ),
+        "1984": (
+            "Winston Smith, his chin nuzzled into his breast in an effort to escape the vile wind, slipped quickly through the glass doors "
+            "of Victory Mansions, though not quickly enough to prevent a swirl of gritty dust from entering along with him."
+        )
+    }
+    # Pick a random sample
+    title, paragraph = random.choice(list(samples.items()))
+    # Blackout the words in the current 95% word list (use swl if available, else empty set)
+    wordlist = set()
+    try:
+        wordlist = set(results["swl"]["word"].tolist())
+    except Exception:
+        pass
+    def blackout(text):
+        return " ".join(
+            "_____" if word.strip(".,;!?").lower() in wordlist else word
+            for word in text.split()
+        )
+    masked = blackout(paragraph)
+    st.markdown(masked)
+    guess = st.text_input("Which work is this from?")
+    if guess:
+        if guess.strip().lower() == title.lower():
+            st.success(f"Correct! It’s from *{title}*.")
+        else:
+            st.error("Sorry, that’s not it. Try again!")
