@@ -205,9 +205,17 @@ elif option == "Play Guess the Literature":
     if guess != "Select one":
         if guess == title:
             st.success(f"Correct! It’s from *{title}*.")
-            # Clear quiz so next selection picks a new paragraph
-            del st.session_state.quiz_title
-            del st.session_state.quiz_paragraph
-            del st.session_state.quiz_wordlist
+ 
+            # Offer a Next button to advance
+            if st.button("Next"):
+                # Advance quiz index
+                st.session_state.quiz_index = (st.session_state.quiz_index + 1) % len(samples)
+                # Update session state for the next question
+                next_title = list(samples.keys())[st.session_state.quiz_index]
+                st.session_state.quiz_title = next_title
+                st.session_state.quiz_paragraph = samples[next_title]
+                st.session_state.quiz_wordlist = wordlists[next_title]
+                # Rerun the app to show the new quiz
+                st.experimental_rerun()
         else:
             st.error("Sorry, that’s not it. Try again!")
