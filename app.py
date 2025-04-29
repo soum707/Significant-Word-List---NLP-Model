@@ -120,7 +120,7 @@ elif option == "Paste Your Text":
 
 elif option == "Our Choices for You":
     st.subheader("Select a Preloaded Text File")
-    preloaded_files = ["Alice In Wonderland", "Lord of the Rings - Chapter One", "Titanic (Movie Script)", "The Catcher In The Rye", "The Great Gatsby", "1984", "Harry Potter And the Sorcerer’s Stone"]
+    preloaded_files = ["Alice In Wonderland", "Lord of the Rings - Chapter One", "Titanic (Movie Script)", "The Catcher In The Rye", "The Great Gatsby", "1984", "Harry Potter And the Sorcerer’s Stone", "Snakes on a Plane (Movie Script)"]
     selected_file = st.selectbox("Select a file:", preloaded_files)
     if selected_file:
         file_path = "data/" + selected_file + ".txt"
