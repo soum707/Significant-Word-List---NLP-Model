@@ -3,6 +3,7 @@ import pandas as pd
 from functions import main
 import os
 import io
+import random
 
 def display_results(results):
     st.header("Top 10 Words in each Variation")
@@ -137,7 +138,7 @@ elif option == "Our Choices for You":
         st.session_state["results"] = results
 
 # elif option == "Play Guess the Literature":
-st.header("Guess the Literature")
+st.header("Guess the Literature Game")
 # Define quiz samples and precompute wordlists
 samples = {
     "Pride and Prejudice": (
@@ -189,31 +190,30 @@ def blackout(text, wl):
     )
 st.markdown(blackout(paragraph, wordlist))
 
-# Multiple-choice options
-choices = ["Select one",
-    "Pride and Prejudice",
-    "The Great Gatsby",
-    "1984"]
+ # Randomize multiple-choice options each run
+works = ["Pride and Prejudice", "The Great Gatsby", "1984", "Alice in Wonderland"]
+choices = ["Select one"] + works
 
 guess = st.radio("Which work is this from?", choices, key="guess")
 
+def next_question():
+    # Advance quiz index
+    st.session_state.quiz_index = (st.session_state.quiz_index + 1) % len(samples)
+    # Update quiz title, paragraph, and wordlist
+    next_title = list(samples.keys())[st.session_state.quiz_index]
+    st.session_state.quiz_title = next_title
+    st.session_state.quiz_paragraph = samples[next_title]
+    st.session_state.quiz_wordlist = wordlists[next_title]
+    # Reset the radio selection
+    st.session_state.guess = "Select one"
+    # Rerun the app to refresh UI
+    st.experimental_rerun()
 
 if guess != "Select one":
     if guess == title:
         st.success(f"Correct! It’s from *{title}*.")
         st.markdown(f"**Excerpt:** {paragraph}")
         # Offer a Next button to advance
-        if st.button("Next"):
-            # Reset the radio selection
-
-            # Advance quiz index
-            st.session_state.quiz_index = (st.session_state.quiz_index + 1) % len(samples)
-            # Update session state for the next question
-            next_title = list(samples.keys())[st.session_state.quiz_index]
-            st.session_state.quiz_title = next_title
-            st.session_state.quiz_paragraph = samples[next_title]
-            st.session_state.quiz_wordlist = wordlists[next_title]
-            # Rerun the app to show the new quiz
-            st.experimental_rerun()
+        st.button("Next", on_click=next_question)
     else:
         st.error("Sorry, that’s not it. Try again!")
