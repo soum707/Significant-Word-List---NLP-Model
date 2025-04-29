@@ -138,47 +138,42 @@ elif option == "Our Choices for You":
 
 elif option == "Play Guess the Literature":
     st.subheader("Guess the Literature")
+    # Define quiz samples and precompute wordlists
+    samples = {
+        "Pride and Prejudice": (
+            "Mr. Bennet was so odd a mixture of quick parts, sarcastic humour, reserve, and caprice, "
+            "that the experience of three-and-twenty years had been insufficient to make his wife understand his character. "
+            "Her mind was less difficult to develope. She was a woman of mean understanding, little information, and uncertain temper. "
+            "When she was discontented, she fancied herself nervous. The business of her life was to get her daughters married: "
+            "its solace was visiting and news."
+        ),
+        "The Great Gatsby": (
+            "And as I sat there brooding on the old, unknown world, I thought of Gatsby’s "
+            "wonder when he first picked out the green light at the end of Daisy’s dock. "
+            "He had come a long way to this blue lawn, and his dream must have seemed so close "
+            "that he could hardly fail to grasp it. He did not know that it was already behind him, "
+            "somewhere back in that vast obscurity beyond the city, where the dark fields of the republic rolled on under the night"
+        ),
+        "1984": (
+            "There was of course no way of knowing whether you were being watched at any given moment. "
+            "How often, or on what system, the Thought Police plugged in on any individual wire was guesswork. "
+            "It was even conceivable that they watched everybody all the time. But at any rate they could plug in your "
+            "wire whenever they wanted to. You had to live — did live, from habit that became instinct — in the assumption "
+            "that every sound you made was overheard, and, except in darkness, every movement scrutinized."
+        )
+    }
+    wordlists = {}
+    for t, sample_text in samples.items():
+        fp = os.path.join("data", f"{t}.txt")
+        r = main(fp)
+        wordlists[t] = set(r["swl"]["word"].str.lower())
     # Persist a quiz question until correctly answered
     if "quiz_title" not in st.session_state:
-        # Sample excerpts for the quiz
-        samples = {
-            "Pride and Prejudice": (
-                "Mr. Bennet was so odd a mixture of quick parts, sarcastic humour, reserve, and caprice, "
-                "that the experience of three-and-twenty years had been insufficient to make his wife understand his character. "
-                "Her mind was less difficult to develope. She was a woman of mean understanding, little information, and uncertain temper. "
-                "When she was discontented, she fancied herself nervous. The business of her life was to get her daughters married: "
-                "its solace was visiting and news."
-            ),
-            "The Great Gatsby": (
-                "And as I sat there brooding on the old, unknown world, I thought of Gatsby’s "
-                "wonder when he first picked out the green light at the end of Daisy’s dock. "
-                "He had come a long way to this blue lawn, and his dream must have seemed so close "
-                "that he could hardly fail to grasp it. He did not know that it was already behind him, "
-                "somewhere back in that vast obscurity beyond the city, where the dark fields of the republic rolled on under the night"
-            ),
-            "1984": (
-                "There was of course no way of knowing whether you were being watched at any given moment. "
-                "How often, or on what system, the Thought Police plugged in on any individual wire was guesswork. "
-                "It was even conceivable that they watched everybody all the time. But at any rate they could plug in your "
-                "wire whenever they wanted to. You had to live — did live, from habit that became instinct — in the assumption "
-                "that every sound you made was overheard, and, except in darkness, every movement scrutinized."
-            )
-        }
-        # Generate a 95% word list for each full text in the repo
-        wordlists = {}
-        for t in samples:
-            fp = os.path.join("data", f"{t}.txt")
-            r = main(fp)
-            wordlists[t] = set(r["swl"]["word"].str.lower())
-        # Pick and store the next quiz question in sequence
-        if "quiz_index" not in st.session_state:
-            st.session_state.quiz_index = 0
-        else:
-            st.session_state.quiz_index = (st.session_state.quiz_index + 1) % len(samples)
+        # Initialize quiz index and store initial quiz data
+        st.session_state.quiz_index = 0
         chosen_title = list(samples.keys())[st.session_state.quiz_index]
-        chosen_paragraph = samples[chosen_title]
         st.session_state.quiz_title = chosen_title
-        st.session_state.quiz_paragraph = chosen_paragraph
+        st.session_state.quiz_paragraph = samples[chosen_title]
         st.session_state.quiz_wordlist = wordlists[chosen_title]
 
     # Retrieve persistent quiz state
