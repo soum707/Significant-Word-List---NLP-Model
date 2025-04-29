@@ -3,7 +3,6 @@ import pandas as pd
 from functions import main
 import os
 import io
-import random
 
 def display_results(results):
     st.header("Top 10 Words in each Variation")
@@ -139,47 +138,76 @@ elif option == "Our Choices for You":
 
 elif option == "Play Guess the Literature":
     st.subheader("Guess the Literature")
+    # Persist a quiz question until correctly answered
+    if "quiz_title" not in st.session_state:
+        # Sample excerpts for the quiz
+        samples = {
+            "Pride and Prejudice": (
+                "Mr. Bennet was so odd a mixture of quick parts, sarcastic humour, reserve, and caprice, "
+                "that the experience of three-and-twenty years had been insufficient to make his wife understand his character. "
+                "Her mind was less difficult to develope. She was a woman of mean understanding, little information, and uncertain temper. "
+                "When she was discontented, she fancied herself nervous. The business of her life was to get her daughters married: "
+                "its solace was visiting and news."
+            ),
+            "The Great Gatsby": (
+                "And as I sat there brooding on the old, unknown world, I thought of Gatsby’s "
+                "wonder when he first picked out the green light at the end of Daisy’s dock. "
+                "He had come a long way to this blue lawn, and his dream must have seemed so close "
+                "that he could hardly fail to grasp it. He did not know that it was already behind him, "
+                "somewhere back in that vast obscurity beyond the city, where the dark fields of the republic rolled on under the night"
+            ),
+            "1984": (
+                "There was of course no way of knowing whether you were being watched at any given moment. "
+                "How often, or on what system, the Thought Police plugged in on any individual wire was guesswork. "
+                "It was even conceivable that they watched everybody all the time. But at any rate they could plug in your "
+                "wire whenever they wanted to. You had to live — did live, from habit that became instinct — in the assumption "
+                "that every sound you made was overheard, and, except in darkness, every movement scrutinized."
+            )
+        }
+        # Generate a 95% word list for each full text in the repo
+        wordlists = {}
+        for t in samples:
+            fp = os.path.join("data", f"{t}.txt")
+            r = main(fp)
+            wordlists[t] = set(r["swl"]["word"].str.lower())
+        # Pick and store the next quiz question in sequence
+        if "quiz_index" not in st.session_state:
+            st.session_state.quiz_index = 0
+        else:
+            st.session_state.quiz_index = (st.session_state.quiz_index + 1) % len(samples)
+        chosen_title = list(samples.keys())[st.session_state.quiz_index]
+        chosen_paragraph = samples[chosen_title]
+        st.session_state.quiz_title = chosen_title
+        st.session_state.quiz_paragraph = chosen_paragraph
+        st.session_state.quiz_wordlist = wordlists[chosen_title]
 
-    # Define sample paragraphs
-    samples = {
-        "Pride and Prejudice": (
-            "Elizabeth, as they drove along, watched for the first appearance of Pemberley Woods with some perturbation; "
-            "and when at length they turned in at the lodge, her spirits were in a high flutter. The park was very large, "
-            "and contained great variety of ground. They entered it in one of its lowest points, and drove for some time "
-            "through a beautiful wood stretching over a wide extent. Elizabeth’s mind was too full for conversation, "
-            "but she saw and admired every remarkable spot and point of view."
-        ),
-        "The Great Gatsby": (
-            "In his blue gardens men and girls came and went like moths among the whisperings and the champagne and the stars. "
-            "At high tide in the afternoon I watched his guests diving from the tower of his raft, or taking the sun on the hot sand "
-            "of his beach while his two motor-boats slit the waters of the Sound, drawing aquaplanes over cataracts of foam."
-        ),
-        "1984": (
-            "Winston Smith, his chin nuzzled into his breast in an effort to escape the vile wind, slipped quickly through the glass doors "
-            "of Victory Mansions, though not quickly enough to prevent a swirl of gritty dust from entering along with him."
+    # Retrieve persistent quiz state
+    title = st.session_state.quiz_title
+    paragraph = st.session_state.quiz_paragraph
+    wordlist = st.session_state.quiz_wordlist
+
+    # Blackout words from the excerpt
+    def blackout(text, wl):
+        return " ".join(
+            "_____" if w.strip(".,;!?").lower() in wl else w
+            for w in text.split()
         )
-    }
-# Generate a 95% word list for each full text in the repo
-wordlists = {}
-for title in samples:
-    file_path = os.path.join("data", f"{title}.txt")
-    res = main(file_path)
-    wordlists[title] = set(res["swl"]["word"].str.lower())
-# Select a random excerpt
-title, paragraph = random.choice(list(samples.items()))
-# Blackout words based on that title's wordlist
-def blackout(text, wordlist):
-    return " ".join(
-        "_____" if word.strip(".,;!?").lower() in wordlist else word
-        for word in text.split()
-    )
-masked = blackout(paragraph, wordlists[title])
-st.markdown(masked)
-# Multiple-choice guessing
-choices = random.sample(list(samples.keys()), k=len(samples))
-guess = st.radio("Which work is this from?", ["Select one"] + choices)
-if guess != "Select one":
-    if guess == title:
-        st.success(f"Correct! It’s from *{title}*.")
-    else:
-        st.error("Sorry, that’s not it. Try again!")
+    st.markdown(blackout(paragraph, wordlist))
+
+    # Multiple-choice options
+    choices = ["Select one",
+        "Pride and Prejudice",
+        "The Great Gatsby",
+        "1984"]
+    
+    guess = st.radio("Which work is this from?", choices)
+
+    if guess != "Select one":
+        if guess == title:
+            st.success(f"Correct! It’s from *{title}*.")
+            # Clear quiz so next selection picks a new paragraph
+            del st.session_state.quiz_title
+            del st.session_state.quiz_paragraph
+            del st.session_state.quiz_wordlist
+        else:
+            st.error("Sorry, that’s not it. Try again!")
