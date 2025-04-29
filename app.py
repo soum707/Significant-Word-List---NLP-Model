@@ -205,7 +205,7 @@ elif option == "Play Guess the Literature":
     if guess != "Select one":
         if guess == title:
             st.success(f"Correct! It’s from *{title}*.")
- 
+            st.markdown(f"**Excerpt:** {paragraph}")
             # Offer a Next button to advance
             if st.button("Next"):
                 # Advance quiz index
