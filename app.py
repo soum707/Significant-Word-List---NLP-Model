@@ -167,7 +167,7 @@ wordlists = {}
 for t, sample_text in samples.items():
     fp = os.path.join("data", f"{t}.txt")
     r = main(fp)
-    wordlists[t] = set(r["swl"]["word"].str.lower())
+    wordlists[t] = set(r["swl_no_stopwords"]["word"].str.lower())
 # Persist a quiz question until correctly answered
 if "quiz_title" not in st.session_state:
     # Initialize quiz index and store initial quiz data
@@ -207,7 +207,7 @@ def next_question():
     # Reset the radio selection
     st.session_state.guess = "Select one"
     # Rerun the app to refresh UI
-    st.experimental_rerun()
+    st.rerun()
 
 if guess != "Select one":
     if guess == title:
